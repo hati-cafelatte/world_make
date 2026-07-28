@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENESIS DEUS — 神の座</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <h1>GENESIS DEUS</h1>
+      <div class="sub">あなたは名もなき神である。世界は、あなたを知らぬまま生きている。</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="label">年 / 季節</div><div class="val" id="s-time">—</div></div>
+      <div class="stat"><div class="label">人口</div><div class="val" id="s-pop">—</div></div>
+      <div class="stat"><div class="label">信仰ポイント</div><div class="val" id="s-faith-pt">—</div></div>
+    </div>
+  </div>
+
+  <div class="welcome-back" id="welcome-back"></div>
+
+  <div class="grid">
+
+    <!-- LEFT: MIRACLES -->
+    <div class="panel">
+      <h2>恵み</h2>
+      <div class="miracle-list" id="blessing-list"></div>
+      <div class="miracle-section-label">災害</div>
+      <div class="miracle-list" id="disaster-list"></div>
+    </div>
+
+    <!-- CENTER: 3D WORLD -->
+    <div class="panel" id="world-panel">
+      <h2>世界 <span id="era-badge" class="era-badge">—</span></h2>
+      <div id="world3d-container"><canvas id="world3d-canvas"></canvas>
+        <div id="world-hint">クリックで人物を選択できます</div>
+      </div>
+      <div class="era-sub" id="era-sub">—</div>
+      <div class="era-meta" id="era-meta">—</div>
+      <div style="width:100%;">
+        <div class="faith-bar-outer"><div class="faith-bar-inner" id="faith-bar" style="width:0%"></div></div>
+        <div class="balance-note" id="balance-note">信仰度 —</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CHRONICLE + SELECTED FIGURE -->
+    <div class="panel">
+      <div id="figure-panel" class="figure-panel" style="display:none;">
+        <h2>選ばれし者</h2>
+        <div id="figure-detail"></div>
+        <div class="miracle-list" id="individual-actions"></div>
+        <button id="deselect-btn" class="text-btn">選択を解除</button>
+      </div>
+      <div id="chronicle-wrap">
+        <h2>年代記</h2>
+        <div class="chronicle" id="chronicle"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-controls">
+    <div id="autosave-note">—</div>
+    <button id="reset-btn">世界を終わらせ、やり直す</button>
+  </div>
+
+</div>
+
+<div id="god-name-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h2>汝、名は?</h2>
+    <p>まだ誰も、汝の名を知らない。<br>人々が言葉を得たとき、その名は信仰の源として語り継がれるだろう。</p>
+    <input id="god-name-input" type="text" maxlength="20" placeholder="例:アシュタル">
+    <button id="god-name-confirm">名を刻む</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+<script src="js/game.js"></script>
+<script src="js/world3d.js"></script>
+<script>
+  GenesisDeus.init();
+</script>
+</body>
+</html>
