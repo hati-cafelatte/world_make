@@ -29,7 +29,7 @@ const CONFIG = {
     { name:'現代',        sub:'彼らはもう、空の彼方にまで手を伸ばす。', threshold:9000, settlement:9 },
   ],
   BLESSINGS: [
-    { id:'rain',    name:'実りの雨',       cost:10, min:0,   fx:s=>{ bumpPop(s,0.03); addFaithFlat(s,2); } },
+    { id:'rain',    name:'実りの雨',       cost:8,  min:0,   fx:s=>{ bumpPop(s,0.03); addFaithFlat(s,2); } },
     { id:'climate', name:'安定した気候',    cost:16, min:0,   fx:s=>{ s.stability=Math.min(100,s.stability+8); addFaithFlat(s,3); } },
     { id:'harvest', name:'豊作',           cost:20, min:0,   fx:s=>{ bumpPop(s,0.06); } },
     { id:'cure',    name:'病気の治療',      cost:26, min:0,   fx:s=>{ s.plague=false; bumpPop(s,0.02); addFaithFlat(s,5); } },
@@ -162,7 +162,7 @@ function faithGainMultiplier(s){
 function defaultState(){
   return {
     year:1, season:0, population:40, progress:0,
-    faithLevel:4, faithPoints:8, stability:50, plague:false,
+    faithLevel:4, faithPoints:18, stability:50, plague:false,
     figures:[], chronicle:[], recentActions:[],
     religionName:null, secularized:false,
     godName:null, languageAcquired:false, faithTarget:'player',
@@ -282,16 +282,20 @@ function doIndividualAction(id){
 function selectFigure(fig){ selectedFigureId = fig ? fig.id : null; renderAll(); }
 
 /* ---------- 保存/読込/オフライン進行 ---------- */
+/* GitHub Pages等の通常のブラウザ環境で動かすため、localStorageを使用する */
 async function saveGame(silent){
   STATE.lastTimestamp = Date.now();
   try{
-    await window.storage.set(CONFIG.SAVE_KEY, JSON.stringify(STATE), false);
+    localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(STATE));
     if (!silent) document.getElementById('autosave-note').textContent = '保存しました — '+new Date().toLocaleTimeString();
-  }catch(e){ console.error('save failed', e); }
+  }catch(e){ console.error('save failed', e); if (!silent) document.getElementById('autosave-note').textContent = '保存に失敗しました(ブラウザの設定をご確認ください)'; }
 }
 async function loadGame(){
-  try{ const res = await window.storage.get(CONFIG.SAVE_KEY, false); if (!res||!res.value) return null; return JSON.parse(res.value); }
-  catch(e){ return null; }
+  try{
+    const raw = localStorage.getItem(CONFIG.SAVE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
 }
 function catchUp(state){
   const elapsedMs = Date.now()-(state.lastTimestamp||Date.now());
@@ -378,7 +382,10 @@ function renderAll(){
   const chron = document.getElementById('chronicle');
   chron.innerHTML = s.chronicle.slice(-60).map(e=>`<div class="chron-entry ${e.cls}"><span class="tm">${e.t}</span>${e.text}</div>`).reverse().join('');
 
-  if (window.GenesisDeus3D) window.GenesisDeus3D.update(s, eraIdx, CONFIG);
+  if (window.GenesisDeus3D){
+    try{ window.GenesisDeus3D.update(s, eraIdx, CONFIG); }
+    catch(e){ console.error('3D world update failed:', e); }
+  }
 }
 
 function promptGodName(){
@@ -408,7 +415,10 @@ async function init(){
   document.getElementById('reset-btn').addEventListener('click', onReset);
   document.getElementById('deselect-btn').addEventListener('click', ()=>selectFigure(null));
 
-  if (window.GenesisDeus3D) window.GenesisDeus3D.setup(document.getElementById('world3d-canvas'), CONFIG);
+  if (window.GenesisDeus3D){
+    try{ window.GenesisDeus3D.setup(document.getElementById('world3d-canvas'), CONFIG); }
+    catch(e){ console.error('3D world failed to initialize, continuing without it:', e); }
+  }
 
   const loaded = await loadGame();
   if (loaded){
@@ -448,7 +458,10 @@ async function init(){
 
 function startLoop(){
   if (tickTimer) clearInterval(tickTimer);
-  tickTimer = setInterval(()=>{ simulateTick(STATE); renderAll(); }, CONFIG.TICK_MS);
+  tickTimer = setInterval(()=>{
+    try{ simulateTick(STATE); renderAll(); }
+    catch(e){ console.error('tick failed:', e); }
+  }, CONFIG.TICK_MS);
   setInterval(()=>saveGame(true), 15000);
 }
 
